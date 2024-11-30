@@ -44,7 +44,9 @@ class UserController {
     const { email, password } = req.body;
 
     try {
+      const token = await this.userService.login(email, password);
       const user = await this.userService.getUserByEmail(email);
+
       if (!user) {
         return res.status(404).json({ error: "Usuário não encontrado" });
       }
@@ -57,7 +59,17 @@ class UserController {
         return res.status(401).json({ error: "Senha inválida" });
       }
 
-      return res.status(200).json({ message: "Login bem-sucedido", user });
+      return res
+        .status(200)
+        .json({
+          message: "Login bem-sucedido",
+          user: {
+            id: user.id,
+            name: user.firstname + user.surname,
+            email: user.email,
+          },
+          token,
+        });
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
